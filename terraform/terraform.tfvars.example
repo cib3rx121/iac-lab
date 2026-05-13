@@ -1,0 +1,14 @@
+# Copia para terraform.tfvars e preenche com os teus valores.
+#   cp terraform.tfvars.example terraform.tfvars
+# O ficheiro terraform.tfvars não deve ir para o Git (contém segredos).
+
+# Secret do API token (Proxmox: Datacenter → Permissions → API Tokens).
+proxmox_api_token_secret = "PREENCHER_TOKEN_SECRET"
+proxmox_api_token_id     = "utilizador@pve!id-do-token"
+proxmox_api_url          = "https://192.168.1.10:8006/api2/json"
+proxmox_node             = "pve"
+vm_template              = "ubuntu-2404-template"
+vm_name                  = "k8s-master-01"
+cloudinit_user           = "dev"
+master_ip_cidr           = "192.168.1.201/24"
+master_gateway           = "192.168.1.1"

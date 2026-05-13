@@ -2,6 +2,8 @@
 .terraform/
 *.tfstate
 *.tfstate.backup
+# Ficheiros que terminam em .tfvars (ex.: terraform.tfvars). Não ignora
+# terraform.tfvars.example — esse pode ir para o repo público.
 *.tfvars
 secrets.tfvars
 

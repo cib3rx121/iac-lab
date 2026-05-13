@@ -1,35 +1,63 @@
-# IaC Lab - Proxmox to Kubernetes
+# IaC Lab
 
-## Português
-
-### Descrição
-Este projeto documenta a implementação de um laboratório de infraestrutura automatizada (Infrastructure as Code), partindo da instalação do Proxmox VE até à orquestração de um cluster Kubernetes.
-
-### Estrutura do Projeto
-- `terraform/`: Ficheiros de configuração para provisionamento de VMs e Templates.
-- `ansible/`: Playbooks para automação de configurações e instalação de software.
-- `kubernetes/`: Manifestos e configurações para gestão do cluster.
-- `scripts/`: Scripts auxiliares para manutenção e automação rápida.
-
-### Objetivos
-- Automatizar a criação de máquinas virtuais via API do Proxmox.
-- Utilizar o Ansible para gestão de configuração e segurança dos nós.
-- Implementar um cluster Kubernetes funcional para deploy de aplicações.
+Homelab de **Infrastructure as Code**: Proxmox como hipervisor, Terraform para provisionar máquinas, com vista a Ansible e Kubernetes. Repositório pensado para ser partilhado publicamente — sem segredos no código.
 
 ---
 
-## English
+## O que está implementado
 
-### Description
-This project documents the implementation of an automated infrastructure lab (Infrastructure as Code), from the initial Proxmox VE setup to Kubernetes cluster orchestration.
+**Terraform** em `terraform/` cria uma VM Linux a partir de um template no Proxmox (cloud-init, rede estática, chave SSH). O resto da stack está em construção.
 
-### Project Structure
-- `terraform/`: Configuration files for VM and Template provisioning.
-- `ansible/`: Playbooks for configuration management and software installation.
-- `kubernetes/`: Manifests and configurations for cluster management.
-- `scripts/`: Helper scripts for maintenance and quick automation.
+---
 
-### Objectives
-- Automate virtual machine creation via Proxmox API.
-- Use Ansible for node configuration management and hardening.
-- Deploy a functional Kubernetes cluster for application hosting.
+## Estrutura
+
+```
+iac-lab/
+├── README.md
+├── .gitignore
+└── terraform/
+    ├── main.tf
+    ├── provider.tf
+    ├── variables.tf
+    ├── terraform.tfvars.example
+    └── .terraform.lock.hcl
+```
+
+Crie localmente `terraform/terraform.tfvars` (a partir do `.example`) — esse ficheiro **não** deve ser commitado. Em breve: pastas `ansible/`, `kubernetes/` e `scripts/`.
+
+---
+
+## Requisitos
+
+- [Terraform](https://www.terraform.io/downloads) instalado  
+- Proxmox VE com template pronto para clone  
+- Utilizador com **API token** no Proxmox (secret só no `terraform.tfvars`)
+
+---
+
+## Como correr
+
+```bash
+cd terraform
+cp terraform.tfvars.example terraform.tfvars
+# Editar terraform.tfvars: URL da API, nó, template, rede e secret do token
+
+terraform init
+terraform plan
+terraform apply
+```
+
+Variáveis declaradas em `variables.tf`; valores reais no `terraform.tfvars`. O ficheiro `terraform.tfvars.example` serve de modelo para quem clona o repositório.
+
+---
+
+## Proxmox (resumo)
+
+Num lab típico: repositórios *No-Subscription*, utilizador de automação, token de API em **Datacenter → Permissions → API Tokens**, permissões no caminho certo do cluster. Ajuste nomes e roles ao seu ambiente.
+
+---
+
+## Próximos passos
+
+Mais variáveis no Terraform, Ansible nos nós, bootstrap de Kubernetes e um workload de exemplo — commits incrementais à medida que o projeto avança.
