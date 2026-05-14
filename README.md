@@ -1,6 +1,6 @@
 # IaC Lab
 
-Personal homelab for **Infrastructure as Code**: **Proxmox VE** as the hypervisor, **Terraform** to provision Linux VMs from templates (**cloud-init**, static networking, SSH keys), with Ansible and Kubernetes planned next. The repository is safe to publish: **no secrets** in Git (tokens and `terraform.tfvars` stay local).
+Personal homelab for **Infrastructure as Code**: **Proxmox VE** as the hypervisor, **Terraform** to provision Linux VMs from templates (**cloud-init**, static networking, SSH keys), and **Ansible** for post-provision checks (baseline playbook). **Kubernetes** bootstrap and heavier automation are planned next. The repository is safe to publish: **no secrets** in Git (tokens and `terraform.tfvars` stay local).
 
 ## Scope
 
@@ -13,11 +13,20 @@ Typical stack: **Linux host (KVM)** → **Proxmox VM** → **workload VM** creat
 | Path | Purpose |
 |------|---------|
 | `terraform/` | `proxmox_vm_qemu` (provider **telmate/proxmox**): clone from template, cloud-init (`ciuser`, `ipconfig0`, `ssh_public_key` in `terraform.tfvars`), disks and bridge. |
+| `ansible.cfg` | Repo-root Ansible defaults: inventory path, `roles_path`, `host_key_checking = False` (lab only). |
+| `ansible/inventory/hosts.ini` | Inventory group **`[lab]`**; set **`ansible_host`** and **`ansible_user`** to match each VM. |
+| `ansible/playbooks/site.yml` | Baseline playbook: gather facts, print OS family, run **`uptime`** (read-only). |
 
 ```
 iac-lab/
 ├── README.md
+├── ansible.cfg
 ├── .gitignore
+├── ansible/
+│   ├── inventory/
+│   │   └── hosts.ini
+│   └── playbooks/
+│       └── site.yml
 └── terraform/
     ├── main.tf
     ├── provider.tf
@@ -60,6 +69,16 @@ terraform apply
 
 Variables are in `variables.tf`. Set **`ssh_public_key`** in `terraform.tfvars` (one line, same key you use on your workstation); never commit the private key.
 
+## Ansible
+
+Run commands from the **repository root** so `ansible.cfg` is picked up automatically.
+
+1. Edit **`ansible/inventory/hosts.ini`**: `ansible_host` must be the VM’s reachable IP (same network as your workstation or via jump host), and `ansible_user` must match **`cloudinit_user`** in Terraform (or another account with SSH key access).
+2. Connectivity check: `ansible lab -m ping`
+3. Baseline playbook: `ansible-playbook ansible/playbooks/site.yml`
+
+The playbook uses **`gather_facts: true`** and read-only tasks (`debug`, `command` with `changed_when: false`). Escalation with **`become`** is not required yet.
+
 ## Roadmap
 
-More Terraform variables/modules, **Ansible** on nodes, **Kubernetes** bootstrap, sample workload — incremental commits.
+More Terraform variables/modules, deeper **Ansible** (roles, `become`, packages), **Kubernetes** bootstrap, sample workload — incremental commits.
